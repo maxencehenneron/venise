@@ -1,7 +1,6 @@
 package binary
 
 import (
-	"github.com/dernise/imposm3/element"
 	"github.com/dernise/venise/structures"
 	"github.com/golang/protobuf/proto"
 )
@@ -63,16 +62,16 @@ func MarshalWay(way *structures.Way) ([]byte, error) {
 	return proto.Marshal(pbfWay)
 }
 
-func UnmarshalWay(data []byte) (way *element.Way, err error) {
+func UnmarshalWay(data []byte) (way *structures.Way, err error) {
 	pbfWay := &Way{}
 	err = proto.Unmarshal(data, pbfWay)
 	if err != nil {
 		return nil, err
 	}
 
-	way = &element.Way{}
+	way = &structures.Way{}
 	deltaUnpack(pbfWay.Refs)
-	way.Refs = pbfWay.Refs
+	way.NodeIDs = pbfWay.Refs
 	way.Tags = tagsFromArray(pbfWay.Tags)
 	return way, nil
 }
