@@ -6,11 +6,12 @@ import (
 )
 
 type OSM struct {
-	dir    string
-	Nodes  *Nodes
-	Coords *Coords
-	Ways   *Ways
-	opened bool
+	dir       string
+	Nodes     *Nodes
+	Coords    *Coords
+	Ways      *Ways
+	Relations *Relations
+	opened    bool
 }
 
 func NewOSMCache(dir string) *OSM {
@@ -38,6 +39,12 @@ func (c *OSM) Open() error {
 		return err
 	}
 
+	c.Relations, err = NewRelationsCache(filepath.Join(c.dir, "relations"))
+	if err != nil {
+		c.Close()
+		return err
+	}
+
 	c.opened = true
 	return nil
 }
@@ -56,6 +63,11 @@ func (c *OSM) Close() {
 	if c.Ways != nil {
 		c.Ways.Close()
 		c.Ways = nil
+	}
+
+	if c.Relations != nil {
+		c.Relations.Close()
+		c.Relations = nil
 	}
 }
 

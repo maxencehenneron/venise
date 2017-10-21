@@ -24,7 +24,7 @@ func main() {
 	cache := cache.NewOSMCache("bin")
 	cache.Open()
 
-	pbfReader := reader.NewPbfReader("nord-pas-de-calais-latest.osm.pbf", cache, tags)
+	pbfReader := reader.NewPbfReader("nord-pas-de-calais-latest.osm.pbf", cache)
 
 	pbfReader.Read()
 }

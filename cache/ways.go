@@ -22,10 +22,6 @@ func NewWaysCache(path string) (*Ways, error) {
 }
 
 func (w *Ways) PutWay(way structures.Way) error {
-	if len(way.Tags) == 0 {
-		return nil
-	}
-
 	bytes, err := binary.MarshalWay(&way)
 	if err != nil {
 		return err

@@ -18,11 +18,10 @@ import (
 type Pbf struct {
 	fileName string
 	cache    *cache.OSM
-	tags     map[string][]string
 }
 
-func NewPbfReader(fileName string, cache *cache.OSM, tags map[string][]string) *Pbf {
-	return &Pbf{fileName, cache, tags}
+func NewPbfReader(fileName string, cache *cache.OSM) *Pbf {
+	return &Pbf{fileName, cache}
 }
 
 func (pbf *Pbf) Read() error {
@@ -42,6 +41,7 @@ func (pbf *Pbf) Read() error {
 	pbfParser := parser.NewPbfParser(runtime.NumCPU(), decoder, coords, nodes, ways, relations)
 
 	coordsSync := sync.WaitGroup{}
+	waysSync := sync.WaitGroup{}
 
 	coordsSync.Add(1)
 	go func() {
@@ -55,7 +55,7 @@ func (pbf *Pbf) Read() error {
 	coordsSync.Add(1)
 	go func() {
 		for node := range nodes {
-			if pbf.ShouldInsert(node) {
+			if len(node.Tags) > 0 {
 				pbf.cache.Nodes.PutNode(node)
 			}
 		}
@@ -63,17 +63,21 @@ func (pbf *Pbf) Read() error {
 		coordsSync.Done()
 	}()
 
+	waysSync.Add(1)
 	go func() {
 		coordsSync.Wait()
 		fmt.Println("Started parsing ways")
 		for way := range ways {
 			pbf.cache.Ways.PutWay(way)
 		}
+		waysSync.Done()
 	}()
 
 	go func() {
-		for range relations {
-
+		waysSync.Wait()
+		fmt.Println("Started parsing relations")
+		for relation := range relations {
+			pbf.cache.Relations.PutRelation(relation)
 		}
 	}()
 
@@ -83,16 +87,16 @@ func (pbf *Pbf) Read() error {
 }
 
 // Verifies that the node is in the list of wanted nodes
-func (pbf *Pbf) ShouldInsert(node structures.Node) bool {
-	shouldInsert := false
-	for key, values := range pbf.tags {
-		if val, ok := node.Tags[key]; ok {
-			for _, value := range values {
-				if val == value {
-					shouldInsert = true
-				}
-			}
-		}
-	}
-	return shouldInsert
-}
+//func (pbf *Pbf) ShouldInsert(node structures.Node) bool {
+//	shouldInsert := false
+//	for key, values := range pbf.tags {
+//		if val, ok := node.Tags[key]; ok {
+//			for _, value := range values {
+//				if val == value {
+//					shouldInsert = true
+//				}
+//			}
+//		}
+//	}
+//	return shouldInsert
+//}
