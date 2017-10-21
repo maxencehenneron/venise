@@ -74,6 +74,9 @@ func (p *Pbf) DecodePbfData() error {
 				w++
 			case *structures.Relation:
 				// Process Relation v.
+				if r == 0 { // First way is being processed, close the other chans
+					close(p.ways)
+				}
 				p.relations <- *v
 				r++
 			default:
@@ -82,7 +85,6 @@ func (p *Pbf) DecodePbfData() error {
 		}
 	}
 
-	close(p.ways)
 	close(p.relations)
 
 	return nil
