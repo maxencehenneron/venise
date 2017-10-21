@@ -5,6 +5,10 @@ import (
 	"os"
 	"runtime"
 
+	"sync"
+
+	"fmt"
+
 	"github.com/dernise/venise/cache"
 	"github.com/dernise/venise/decoder"
 	"github.com/dernise/venise/parser"
@@ -14,10 +18,11 @@ import (
 type Pbf struct {
 	fileName string
 	cache    *cache.OSM
+	tags     map[string][]string
 }
 
-func NewPbfReader(fileName string, cache *cache.OSM) *Pbf {
-	return &Pbf{fileName, cache}
+func NewPbfReader(fileName string, cache *cache.OSM, tags map[string][]string) *Pbf {
+	return &Pbf{fileName, cache, tags}
 }
 
 func (pbf *Pbf) Read() error {
@@ -36,18 +41,33 @@ func (pbf *Pbf) Read() error {
 
 	pbfParser := parser.NewPbfParser(runtime.NumCPU(), decoder, coords, nodes, ways, relations)
 
-	cache := cache.NewOSMCache("bin")
-	cache.Open()
+	coordsSync := sync.WaitGroup{}
 
+	coordsSync.Add(1)
 	go func() {
-		for range coords {
-
+		for node := range coords {
+			pbf.cache.Coords.PutCoord(node) // Every node should be put in cache.
 		}
+		fmt.Println("Finished parsing coords")
+		coordsSync.Done()
+	}()
+
+	coordsSync.Add(1)
+	go func() {
+		for node := range nodes {
+			if pbf.ShouldInsert(node) {
+				pbf.cache.Nodes.PutNode(node)
+			}
+		}
+		fmt.Println("Finished parsing nodes")
+		coordsSync.Done()
 	}()
 
 	go func() {
-		for node := range nodes {
-			cache.Nodes.PutNode(node)
+		coordsSync.Wait()
+		fmt.Println("Started parsing ways")
+		for way := range ways {
+			pbf.cache.Ways.PutWay(way)
 		}
 	}()
 
@@ -57,13 +77,22 @@ func (pbf *Pbf) Read() error {
 		}
 	}()
 
-	go func() {
-		for range ways {
-
-		}
-	}()
-
 	pbfParser.DecodePbfData()
 
 	return nil
+}
+
+// Verifies that the node is in the list of wanted nodes
+func (pbf *Pbf) ShouldInsert(node structures.Node) bool {
+	shouldInsert := false
+	for key, values := range pbf.tags {
+		if val, ok := node.Tags[key]; ok {
+			for _, value := range values {
+				if val == value {
+					shouldInsert = true
+				}
+			}
+		}
+	}
+	return shouldInsert
 }

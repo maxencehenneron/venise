@@ -6,31 +6,31 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
-type Nodes struct {
+type Ways struct {
 	*leveldb.DB
 }
 
-func NewNodesCache(path string) (*Nodes, error) {
+func NewWaysCache(path string) (*Ways, error) {
 	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	cache := Nodes{db}
+	cache := Ways{db}
 
 	return &cache, err
 }
 
-func (n *Nodes) PutNode(node structures.Node) error {
-	if len(node.Tags) == 0 {
+func (w *Ways) PutWay(way structures.Way) error {
+	if len(way.Tags) == 0 {
 		return nil
 	}
 
-	bytes, err := binary.MarshalNode(&node)
+	bytes, err := binary.MarshalWay(&way)
 	if err != nil {
 		return err
 	}
 
-	n.Put(idToKeyBuf(node.ID), bytes, nil)
+	w.Put(idToKeyBuf(way.ID), bytes, nil)
 	return nil
 }

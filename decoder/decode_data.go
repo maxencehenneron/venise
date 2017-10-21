@@ -115,7 +115,7 @@ func (dec *dataDecoder) parseWays(pb *OSMPBF.PrimitiveBlock, ways []*OSMPBF.Way)
 
 		info := extractInfo(st, way.GetInfo(), dateGranularity)
 
-		dec.q = append(dec.q, &structures.Way{id, tags, nodeIDs, info, nil, nil})
+		dec.q = append(dec.q, &structures.Way{ID: id, Tags: tags, NodeIDs: nodeIDs, Info: info})
 	}
 }
 

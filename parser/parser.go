@@ -66,6 +66,10 @@ func (p *Pbf) DecodePbfData() error {
 				n++
 			case *structures.Way:
 				// Process Way v.
+				if w == 0 { // First way is being processed, close the other chans
+					close(p.nodes)
+					close(p.coords)
+				}
 				p.ways <- *v
 				w++
 			case *structures.Relation:
@@ -77,6 +81,9 @@ func (p *Pbf) DecodePbfData() error {
 			}
 		}
 	}
+
+	close(p.ways)
+	close(p.relations)
 
 	return nil
 }

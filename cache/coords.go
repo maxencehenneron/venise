@@ -31,3 +31,22 @@ func (c *Coords) PutCoord(node structures.Node) error {
 	c.Put(idToKeyBuf(node.ID), bytes, nil)
 	return nil
 }
+
+func (c *Coords) FillWay(way *structures.Way) error {
+	way.Nodes = make([]structures.Node, len(way.NodeIDs))
+
+	for _, nodeId := range way.NodeIDs {
+		nodeBuf, err := c.Get(idToKeyBuf(nodeId), nil)
+		if err != nil {
+			return err
+		}
+
+		node := structures.Node{
+			ID:   nodeId,
+			Info: structures.Info{},
+		}
+		unMarshalledCoords := binary.UnmarshallCoord(nodeBuf, node)
+		way.Nodes = append(way.Nodes, unMarshalledCoords)
+	}
+	return nil
+}

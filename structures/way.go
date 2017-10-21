@@ -11,6 +11,7 @@ type Way struct {
 	Tags    map[string]string
 	NodeIDs []int64
 	Info    Info
+	Nodes   []Node
 
 	Center *Point      `bson:"center,omitempty"`
 	Loc    interface{} `bson:"loc,omitempty"`
