@@ -34,3 +34,23 @@ func (n *Nodes) PutNode(node structures.Node) error {
 	n.Put(idToKeyBuf(node.ID), bytes, nil)
 	return nil
 }
+
+func (n *Nodes) Iterate() chan *structures.Node {
+	nodes := make(chan *structures.Node)
+	go func() {
+		defer close(nodes)
+		iterator := n.NewIterator(nil, nil)
+		iterator.First()
+		for ; iterator.Valid(); iterator.Next() {
+			node, err := binary.UnmarshalNode(iterator.Value())
+			if err != nil {
+				panic(err)
+			}
+			node.ID = idFromKeyBuf(iterator.Key())
+
+			nodes <- node
+		}
+
+	}()
+	return nodes
+}

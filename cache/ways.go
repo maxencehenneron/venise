@@ -30,3 +30,23 @@ func (w *Ways) PutWay(way structures.Way) error {
 	w.Put(idToKeyBuf(way.ID), bytes, nil)
 	return nil
 }
+
+func (w *Ways) Iterate() chan *structures.Way {
+	ways := make(chan *structures.Way)
+	go func() {
+		defer close(ways)
+		iterator := w.NewIterator(nil, nil)
+		iterator.First()
+		for ; iterator.Valid(); iterator.Next() {
+			way, err := binary.UnmarshalWay(iterator.Value())
+			if err != nil {
+				panic(err)
+			}
+			way.ID = idFromKeyBuf(iterator.Key())
+
+			ways <- way
+		}
+
+	}()
+	return ways
+}

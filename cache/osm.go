@@ -71,6 +71,10 @@ func (c *OSM) Close() {
 	}
 }
 
+func idFromKeyBuf(buf []byte) int64 {
+	return int64(binary.BigEndian.Uint64(buf))
+}
+
 func idToKeyBuf(id int64) []byte {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, uint64(id))

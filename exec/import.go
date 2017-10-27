@@ -15,11 +15,6 @@ func main() {
 
 	go parser.StartDetailsRoutine()
 
-	tags := make(map[string][]string)
-	tags["amenity"] = []string{
-		"bicycle_rental",
-	}
-
 	// Setup cache
 	cache := cache.NewOSMCache("bin")
 	cache.Open()

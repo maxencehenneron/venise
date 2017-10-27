@@ -3,7 +3,6 @@ package parser
 import (
 	"io"
 	"log"
-
 	"fmt"
 	"time"
 

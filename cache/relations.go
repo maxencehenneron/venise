@@ -34,3 +34,23 @@ func (r *Relations) PutRelation(relation structures.Relation) error {
 	r.Put(idToKeyBuf(relation.ID), bytes, nil)
 	return nil
 }
+
+func (r *Relations) Iterate() chan *structures.Relation {
+	relations := make(chan *structures.Relation)
+	go func() {
+		defer close(relations)
+		iterator := r.NewIterator(nil, nil)
+		iterator.First()
+		for ; iterator.Valid(); iterator.Next() {
+			relation, err := binary.UnmarshalRelation(iterator.Value())
+			if err != nil {
+				panic(err)
+			}
+			relation.ID = idFromKeyBuf(iterator.Key())
+
+			relations <- relation
+		}
+
+	}()
+	return relations
+}
