@@ -46,18 +46,19 @@ func main() {
 	cache := cache.NewOSMCache("bin")
 	cache.Open()
 
-	nodeWriter := writer.NewNodesWriter(cache, db)
-	nodeWriter.WriteNodes(tags)
+	nodeWriter := writer.NewNodesWriter(cache, db, tags)
+	nodeWriter.WriteNodes()
 
 	fmt.Println("Nodes done")
 
-	waysWriter := writer.NewWaysWriter(cache, db)
-	waysWriter.WriteWays(tags)
+	relationsWriter := writer.NewRelationsWriter(cache, db, tags)
+	relationsWriter.WriteRelations()
+
+	fmt.Println("Relations done")
+
+	waysWriter := writer.NewWaysWriter(cache, db, tags)
+	waysWriter.WriteWays()
 
 	fmt.Println("Ways done")
 
-	relationsWriter := writer.NewRelationsWriter(cache, db)
-	relationsWriter.WriteRelations(tags)
-
-	fmt.Println("Relations done")
 }

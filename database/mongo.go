@@ -30,15 +30,24 @@ func (mg *MongoDatabase) EnsureIndexes() error {
 	for _, c := range mg.collections {
 		collection := mg.C(c)
 
-		err := collection.With(session).EnsureIndex(
-			mgo.Index{
+		indexes := []mgo.Index{
+			{
 				Key:  []string{"$2dsphere:loc"},
 				Bits: 26,
-			})
-
-		if err != nil {
-			return err
+			},
+			{
+				Key:    []string{"osm_id", "loc.type"},
+				Unique: true,
+			},
 		}
+
+		for _, index := range indexes {
+			err := collection.With(session).EnsureIndex(index)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	return nil
 }

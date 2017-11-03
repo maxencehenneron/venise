@@ -1,10 +1,7 @@
 package writer
 
 import (
-	"fmt"
-
 	"github.com/dernise/venise/cache"
-	"github.com/dernise/venise/structures"
 	"github.com/dernise/venise/database"
 )
 
@@ -12,34 +9,18 @@ type WaysWriter struct {
 	OSM
 }
 
-func NewWaysWriter(cache *cache.OSM, database *database.MongoDatabase) *WaysWriter {
+func NewWaysWriter(cache *cache.OSM, database *database.MongoDatabase, tags map[string][]string) *WaysWriter {
 	return &WaysWriter{
-		OSM{cache, database},
+		OSM{cache, database, tags},
 	}
 }
 
-func (nw *WaysWriter) WriteWays(tags map[string][]string) {
+func (nw *WaysWriter) WriteWays() {
 	ways := nw.cache.Ways.Iterate()
 
 	for way := range ways {
-		if ShouldInsertWay(tags, *way) {
-			fmt.Printf("way : %+v - %+v\n", way.Tags["amenity"], way.Tags["name"])
+		if nw.HasInterrestingTag(way.Tags) {
 			nw.cache.Coords.FillWay(way)
 		}
 	}
-}
-
-// Verifies that the way is in the list of wanted nodes
-func ShouldInsertWay(tags map[string][]string, way structures.Way) bool {
-	shouldInsert := false
-	for key, values := range tags {
-		if val, ok := way.Tags[key]; ok {
-			for _, value := range values {
-				if val == value {
-					shouldInsert = true
-				}
-			}
-		}
-	}
-	return shouldInsert
 }

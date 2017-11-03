@@ -31,6 +31,22 @@ func (w *Ways) PutWay(way structures.Way) error {
 	return nil
 }
 
+func (w *Ways) GetWay(wayId int64) (*structures.Way, error) {
+	bytes, err := w.Get(idToKeyBuf(wayId), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	way, err := binary.UnmarshalWay(bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	way.ID = wayId
+
+	return way, err
+}
+
 func (w *Ways) Iterate() chan *structures.Way {
 	ways := make(chan *structures.Way)
 	go func() {
