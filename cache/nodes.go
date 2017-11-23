@@ -4,14 +4,15 @@ import (
 	"github.com/dernise/venise/cache/binary"
 	"github.com/dernise/venise/structures"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 type Nodes struct {
 	*leveldb.DB
 }
 
-func NewNodesCache(path string) (*Nodes, error) {
-	db, err := leveldb.OpenFile(path, nil)
+func NewNodesCache(path string, options *opt.Options) (*Nodes, error) {
+	db, err := leveldb.OpenFile(path, options)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +51,6 @@ func (n *Nodes) Iterate() chan *structures.Node {
 
 			nodes <- node
 		}
-
 	}()
 	return nodes
 }

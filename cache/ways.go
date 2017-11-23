@@ -4,14 +4,15 @@ import (
 	"github.com/dernise/venise/cache/binary"
 	"github.com/dernise/venise/structures"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 type Ways struct {
 	*leveldb.DB
 }
 
-func NewWaysCache(path string) (*Ways, error) {
-	db, err := leveldb.OpenFile(path, nil)
+func NewWaysCache(path string, options *opt.Options) (*Ways, error) {
+	db, err := leveldb.OpenFile(path, options)
 	if err != nil {
 		return nil, err
 	}

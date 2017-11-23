@@ -4,6 +4,7 @@ import (
 	"github.com/dernise/venise/cache/binary"
 	"github.com/dernise/venise/structures"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 // The coord cache is a cache of every nodes' coordinates.
@@ -11,8 +12,8 @@ type Coords struct {
 	*leveldb.DB
 }
 
-func NewCoordsCache(path string) (*Coords, error) {
-	db, err := leveldb.OpenFile(path, nil)
+func NewCoordsCache(path string, options *opt.Options) (*Coords, error) {
+	db, err := leveldb.OpenFile(path, options)
 	if err != nil {
 		return nil, err
 	}
@@ -33,8 +34,6 @@ func (c *Coords) PutCoord(node structures.Node) error {
 }
 
 func (c *Coords) FillWay(way *structures.Way) error {
-	way.Nodes = make([]structures.Node, len(way.NodeIDs))
-
 	for _, nodeId := range way.NodeIDs {
 		nodeBuf, err := c.Get(idToKeyBuf(nodeId), nil)
 		if err != nil {

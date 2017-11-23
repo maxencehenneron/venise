@@ -21,9 +21,14 @@ func main() {
 	tags := make(map[string][]string)
 	tags["amenity"] = []string{
 		"bicycle_rental",
-		"pharmacy",
-		"place_of_worship",
+		//"pharmacy",
+		//"place_of_worship",
 		"stripclub",
+		//"bar",
+		//"cafe",
+		//"biergarten",
+		//"restaurant",
+		//"college",
 	}
 
 	//setup mgo

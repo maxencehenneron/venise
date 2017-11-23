@@ -50,7 +50,7 @@ func (rw *RelationsWriter) transformToGeoJson(relation *structures.Relation) int
 		}
 
 		if outerCount > 1 {
-			fmt.Println(relation.ID)
+			fmt.Printf("Relation : %v has two outer rings\n", relation.ID)
 		}
 
 		// Checks if the polygon is simple

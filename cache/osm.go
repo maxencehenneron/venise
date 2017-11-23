@@ -3,6 +3,8 @@ package cache
 import (
 	"encoding/binary"
 	"path/filepath"
+
+	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 type OSM struct {
@@ -12,28 +14,34 @@ type OSM struct {
 	Ways      *Ways
 	Relations *Relations
 	opened    bool
+	options   *opt.Options
 }
 
 func NewOSMCache(dir string) *OSM {
-	cache := &OSM{dir: dir}
+	cache := &OSM{
+		dir: dir,
+		options: &opt.Options{
+			OpenFilesCacheCapacity: 50,
+		},
+	}
 	return cache
 }
 
 func (c *OSM) Open() error {
 	var err error
-	c.Nodes, err = NewNodesCache(filepath.Join(c.dir, "nodes"))
+	c.Nodes, err = NewNodesCache(filepath.Join(c.dir, "nodes"), c.options)
 	if err != nil {
 		c.Close()
 		return err
 	}
 
-	c.Coords, err = NewCoordsCache(filepath.Join(c.dir, "coords"))
+	c.Coords, err = NewCoordsCache(filepath.Join(c.dir, "coords"), c.options)
 	if err != nil {
 		c.Close()
 		return err
 	}
 
-	c.Ways, err = NewWaysCache(filepath.Join(c.dir, "ways"))
+	c.Ways, err = NewWaysCache(filepath.Join(c.dir, "ways"), c.options)
 	if err != nil {
 		c.Close()
 		return err

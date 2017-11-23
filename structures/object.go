@@ -5,5 +5,6 @@ type Object struct {
 	Tags  map[string]string `bson:"tags"`
 
 	//Location
-	Loc interface{} `bson:"loc"`
+	Loc    interface{} `bson:"loc"`
+	Center interface{} `bson:"center,omitempty"`
 }
